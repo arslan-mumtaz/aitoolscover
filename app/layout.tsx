@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -30,7 +31,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
          <Navbar/>
-        <main className=" overflow-hidden dark:bg-black dark:text-white">
+        <main className=" overflow-hidden">
         {children}
         </main>
         <Footer/>
