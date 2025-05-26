@@ -1,119 +1,269 @@
-
-'use client'
-
+"use client";
 import { useState } from "react";
 
 const SubmitToolForm = () => {
   // States for form fields
   const [name, setName] = useState('');
-  const [image, setImage] = useState<File | null>(null);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false); // State for success modal
+  const [link, setLink] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [category, setCategory] = useState('');
+  const [description, setDescription] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const categories = [
+    'Writing',
+    'Code Generation',
+    'Image Generation',
+    'Video Generation',
+    'Audio Generation',
+    'Data Analysis',
+    'Productivity',
+    'Marketing',
+    'Education',
+    'Design',
+    'Research',
+    'Other'
+  ];
+
+  const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
 
-    if (!name || !image) {
-      alert("Please fill in all required fields including tool image.");
+    // Validation
+    if (!name || !link || !imageUrl || !category || !description) {
+      setErrorMessage("Please fill in all required fields.");
+      setIsErrorModalOpen(true);
       return;
     }
 
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("image", image);
+    setIsLoading(true);
+
+    const requestBody = {
+      name: name.trim(),
+      link: link.trim(),
+      image_url: imageUrl.trim(),
+      category: category,
+      description: description.trim()
+    };
 
     try {
-      const response = await fetch("https://ai-tools-ali-version-backend.vercel.app/api/tools/tools-with-image", {
+      const response = await fetch("https://ailast-production.up.railway.app/api/tools/submit/", {
         method: "POST",
-        body: formData,
-        credentials: "include"
+        headers: {
+          "Content-Type": "application/json",
+          "authorization": "token 6f958cac723ec7ef2a36ae674293d2aa8b7b6efb"
+        },
+        body: JSON.stringify(requestBody),
       });
 
       if (response.ok) {
-        setIsSuccessModalOpen(true); // Open success modal
+        setIsSuccessModalOpen(true);
+        // Reset form
         setName('');
-        setImage(null);
-        (document.getElementById("toolImages") as HTMLInputElement).value = ''; // Reset file input
+        setLink('');
+        setImageUrl('');
+        setCategory('');
+        setDescription('');
       } else {
         const error = await response.json();
-        alert("Submission failed: " + error.message);
+        setErrorMessage(error.message || `Submission failed with status: ${response.status}`);
+        setIsErrorModalOpen(true);
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      alert("Something went wrong!");
+      setErrorMessage("Network error. Please check your connection and try again.");
+      setIsErrorModalOpen(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const closeModal = () => {
-    setIsSuccessModalOpen(false); // Close success modal
+  const closeSuccessModal = () => {
+    setIsSuccessModalOpen(false);
+  };
+
+  const closeErrorModal = () => {
+    setIsErrorModalOpen(false);
+    setErrorMessage('');
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit} className="max-w-2xl mx-auto bg-white rounded-xl shadow-sm p-8 space-y-6 mt-10">
-        <h2 className="text-2xl font-bold text-center mb-6 text-black">Submit Your AI Tool</h2>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 py-12 px-4">
+      <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-8 space-y-6">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-800 mb-2">Submit Your AI Tool</h2>
+          <p className="text-gray-600">Share your amazing AI tool with the community</p>
+        </div>
 
         {/* Tool Name */}
-        <div>
-          <label htmlFor="toolName" className="block text-sm font-semibold text-gray-700 mb-2">Tool Name</label>
+        <div className="space-y-2">
+          <label htmlFor="toolName" className="block text-sm font-semibold text-gray-700">
+            Tool Name *
+          </label>
           <input
             type="text"
             id="toolName"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Enter tool name"
-            className="w-full px-4 py-3 rounded-full shadow border focus:outline-none focus:ring-2 focus:ring-indigo-500 text-[black]"
+            placeholder="Enter tool name (e.g., ChatGPT, Midjourney)"
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-gray-800"
             required
+            disabled={isLoading}
           />
         </div>
 
-        {/* Tool Image */}
-        <div>
-          <label htmlFor="toolImages" className="block text-sm font-semibold text-gray-700 mb-2">Tool Image</label>
-          <div className="flex items-center space-x-4">
-            <label
-              htmlFor="toolImages"
-              className="cursor-pointer bg-[#7d42fb] text-white py-2 px-4 rounded-full font-semibold hover:bg-indigo-700 transition focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              Choose File
-            </label>
-            <input
-              type="file"
-              id="toolImages"
-              accept="image/*"
-              onChange={(e) => {
-                if (e.target.files && e.target.files[0]) {
-                  setImage(e.target.files[0]);
-                }
-              }}
-              className="hidden"
-              required
-            />
-            {image && (
-              <p className="text-sm text-gray-500">Selected file: {image.name}</p>
-            )}
+        {/* Tool Link */}
+        <div className="space-y-2">
+          <label htmlFor="toolLink" className="block text-sm font-semibold text-gray-700">
+            Tool Link *
+          </label>
+          <input
+            type="url"
+            id="toolLink"
+            value={link}
+            onChange={(e) => setLink(e.target.value)}
+            placeholder="https://example.com"
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-gray-800"
+            required
+            disabled={isLoading}
+          />
+        </div>
+
+        {/* Image URL */}
+        <div className="space-y-2">
+          <label htmlFor="imageUrl" className="block text-sm font-semibold text-gray-700">
+            Image URL *
+          </label>
+          <input
+            type="url"
+            id="imageUrl"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            placeholder="https://example.com/tool-image.png"
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-gray-800"
+            required
+            disabled={isLoading}
+          />
+          {imageUrl && (
+            <div className="mt-3 p-3 bg-gray-50 rounded-xl">
+              <p className="text-sm text-gray-600 mb-2">Image Preview:</p>
+              <img 
+                src={imageUrl} 
+                alt="Tool preview" 
+                className="w-16 h-16 object-cover rounded-lg border"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  const errorDiv = target.nextElementSibling as HTMLElement;
+                  target.style.display = 'none';
+                  if (errorDiv) errorDiv.style.display = 'block';
+                }}
+              />
+              <div className="hidden text-sm text-red-500">Invalid image URL</div>
+            </div>
+          )}
+        </div>
+
+        {/* Category */}
+        <div className="space-y-2">
+          <label htmlFor="category" className="block text-sm font-semibold text-gray-700">
+            Category *
+          </label>
+          <select
+            id="category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-gray-800 bg-white"
+            required
+            disabled={isLoading}
+          >
+            <option value="">Select a category</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Description */}
+        <div className="space-y-2">
+          <label htmlFor="description" className="block text-sm font-semibold text-gray-700">
+            Description *
+          </label>
+          <textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Describe what your AI tool does and its key features..."
+            rows={4}
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-gray-800 resize-none"
+            required
+            disabled={isLoading}
+          />
+          <div className="text-right text-sm text-gray-500">
+            {description.length}/500 characters
           </div>
         </div>
 
         {/* Submit Button */}
         <button
-          type="submit"
-          className="w-full bg-[#7d42fb] text-white py-3 px-6 rounded-full font-semibold hover:bg-indigo-700 transition focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          onClick={handleSubmit}
+          disabled={isLoading}
+          className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 px-6 rounded-xl font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-purple-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
         >
-          Submit Tool
+          {isLoading ? (
+            <>
+              <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+              <span>Submitting...</span>
+            </>
+          ) : (
+            <>
+              <span>Submit Tool</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+            </>
+          )}
         </button>
-      </form>
+      </div>
 
       {/* Success Modal */}
       {isSuccessModalOpen && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-sm w-full text-center">
-            <h3 className="text-xl font-bold text-green-600 mb-4">Tool Submitted Successfully!</h3>
-            <p className="text-gray-700 mb-4">Your AI tool has been submitted. Thank you!</p>
+        <div className="fixed bottom-4 right-4 flex justify-center items-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center transform">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-green-600 mb-3">Success!</h3>
+            <p className="text-gray-700 mb-6">Your AI tool has been submitted successfully. Thank you for contributing to our community!</p>
             <button
-              onClick={closeModal}
-              className="bg-[#7d42fb] text-white py-2 px-6 rounded-full font-semibold hover:bg-indigo-700 transition"
+              onClick={closeSuccessModal}
+              className="bg-gradient-to-r from-green-500 to-green-600 text-white py-3 px-8 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-green-300"
             >
-              Close
+              Awesome!
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Error Modal */}
+      {isErrorModalOpen && (
+        <div className="fixed bottom-4 right-4 flex justify-center items-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center transform">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-red-600 mb-3">Oops!</h3>
+            <p className="text-gray-700 mb-6">{errorMessage}</p>
+            <button
+              onClick={closeErrorModal}
+              className="bg-gradient-to-r from-red-500 to-red-600 text-white py-3 px-8 rounded-xl font-semibold hover:from-red-600 hover:to-red-700 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-red-300"
+            >
+              Try Again
             </button>
           </div>
         </div>
