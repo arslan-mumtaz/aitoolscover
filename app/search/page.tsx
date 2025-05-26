@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -29,7 +29,7 @@ interface SearchResponse {
   results: ProductTool[];
 }
 
-const SearchPage = () => {
+const SearchContent  = () => {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
   const [searchData, setSearchData] = useState<SearchResponse | null>(null);
@@ -239,5 +239,20 @@ const SearchPage = () => {
     </main>
   );
 };
+
+const SearchPage = () => {
+  return (
+    <Suspense fallback={
+      <div className="px-4 md:px-16 py-8">
+        <div className="flex justify-center items-center h-64">
+          <div className="w-6 h-6 border-2 border-[#7d42fb] border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </div>
+    }>
+      <SearchContent />
+    </Suspense>
+  );
+};
+
 
 export default SearchPage;
