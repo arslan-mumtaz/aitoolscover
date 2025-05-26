@@ -17,7 +17,7 @@ export default async function ProductDetail(props: { params: Promise<{ id: strin
   return (
     <div className="p-8 ml-10">
       {/* Back Link */}
-      <Link href="/products" className="flex gap-2 items-center text-[#000418] font-bold hover:underline">
+      <Link href="/" className="flex gap-2 items-center text-[#000418] font-bold hover:underline">
         <FaArrowLeft size={15} /> <span>Browse all tools</span>
       </Link>
 

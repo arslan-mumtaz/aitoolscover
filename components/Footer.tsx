@@ -10,11 +10,12 @@ export default function Footer() {
           {/* Logo and Description */}
           <div className="md:col-span-1">
             <div className="flex items-center mb-4">
-              <Image src="/ai_logo.png" alt="logo" width={50} height={50} />
-              <span className="font-bold text-xl">Tools Radar</span>
+              
+              <Image src="/logo.png" alt="logo" width={50} height={50} />
+              <span className="font-bold text-xl">Tools Cover</span>
             </div>
             <p className="text-[#4a4a4a] font-semibold mb-4 ">
-              Never miss out on the latest developments in AI. AI Tools Radar
+              Never miss out on the latest developments in AI. AI Tools Cover
               delivers daily updates on new tools, ensuring you stay informed
               about the freshest and most impactful technologies.
             </p>
@@ -97,13 +98,18 @@ export default function Footer() {
           </div>
 
           {/* Contact Column */}
-          <div className="md:col-span-1">
-            <h3 className="font-bold text-lg mb-4">Contact</h3>
-            <p className="text-[#4a4a4a] font-semibold mb-6">support@aitoolsradar.com</p>
+          <div className="flex flex-col gap-4">
+            <h3 className="font-bold text-lg">Contact</h3>
+            <a
+              href="mailto:support@aitoolscover.com"
+              className="text-[#4a4a4a] font-semibold"
+            >
+              support@aitoolscover.com
+            </a>
 
             <div className="flex space-x-4">
               <Link
-                href="https://twitter.com/aitoolsradar"
+                href="https://twitter.com/aitoolscover"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -123,7 +129,7 @@ export default function Footer() {
                 </div>
               </Link>
               <Link
-                href="https://linkedin.com/company/aitoolsradar"
+                href="https://linkedin.com/company/aitoolscover"
                 target="_blank"
                 rel="noopener noreferrer"
               >

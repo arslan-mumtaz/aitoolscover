@@ -8,9 +8,12 @@ import { NAV_LINKS } from "@/constants";
 const Navbar = () => {
   const [theme, setTheme] = useState("light");
 
+
   useEffect(() => {
     const storedTheme = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
 
     if (storedTheme === "dark" || (!storedTheme && prefersDark)) {
       document.documentElement.classList.add("dark");
@@ -21,19 +24,25 @@ const Navbar = () => {
     }
   }, []);
 
+  const [, forceUpdate] = useState(0);
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
-    document.documentElement.classList.toggle("dark", newTheme === "dark");
+    if (newTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    forceUpdate(n => n + 1); // force re-render
   };
 
   return (
     <nav className="w-[95%] mx-auto flex justify-between px-4 py-5 bg-white dark:bg-[#121212] transition-all duration-300">
       <Link href="/" className="flex items-center justify-center gap-2">
-        <Image src="/ai_logo.png" alt="ai" width={50} height={50} />
+        <Image src="/logo.png" alt="ai" width={50} height={50} />
         <p className="font-bold text-xl text-black dark:text-white">
-          Tools Radar
+          Tools Cover
         </p>
       </Link>
 
@@ -61,7 +70,9 @@ const Navbar = () => {
         >
           <div
             className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 transform ${
-              theme === "dark" ? "translate-x-8 bg-black" : "translate-x-0 bg-white"
+              theme === "dark"
+                ? "translate-x-8 bg-black"
+                : "translate-x-0 bg-white"
             }`}
           >
             <img

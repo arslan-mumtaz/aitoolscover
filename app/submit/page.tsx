@@ -22,9 +22,10 @@ const SubmitToolForm = () => {
     formData.append("image", image);
 
     try {
-      const response = await fetch("http://localhost:5000/api/tools/tools-with-image", {
+      const response = await fetch("https://ai-tools-ali-version-backend.vercel.app/api/tools/tools-with-image", {
         method: "POST",
         body: formData,
+        credentials: "include"
       });
 
       if (response.ok) {
@@ -49,7 +50,7 @@ const SubmitToolForm = () => {
   return (
     <div>
       <form onSubmit={handleSubmit} className="max-w-2xl mx-auto bg-white rounded-xl shadow-sm p-8 space-y-6 mt-10">
-        <h2 className="text-2xl font-bold text-center mb-6">Submit Your AI Tool</h2>
+        <h2 className="text-2xl font-bold text-center mb-6 text-black">Submit Your AI Tool</h2>
 
         {/* Tool Name */}
         <div>
@@ -60,7 +61,7 @@ const SubmitToolForm = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Enter tool name"
-            className="w-full px-4 py-3 rounded-full shadow border focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-4 py-3 rounded-full shadow border focus:outline-none focus:ring-2 focus:ring-indigo-500 text-[black]"
             required
           />
         </div>

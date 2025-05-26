@@ -10,7 +10,7 @@ const FeaturedProduct: React.FC = () => {
   return (
     <main className="px-4 md:px-16">
       <h1 className="font-bold text-4xl mb-10 px-4 text-black">
-        Featured Products
+        Featured Tools
       </h1>
       <section className="w-full mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 ">
         {featuredProducts.map((product) => (
@@ -36,7 +36,7 @@ const FeaturedProduct: React.FC = () => {
                     height={50}
                     className="rounded-full"
                   />
-                  <h3 className="font-bold">{product.name}</h3>
+                  <h3 className="font-bold" style={{color: 'black'}}>{product.name}</h3>
                 </div>
                 <span className="text-[#7d42fb] mt-3">
                   <FiExternalLink size={28} />
