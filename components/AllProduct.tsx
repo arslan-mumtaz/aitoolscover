@@ -42,6 +42,35 @@ interface ProductTool {
   submitted_by: string | null;
 }
 
+// Helper function to create URL-friendly slugs
+const createSlug = (name: string): string => {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
+// Helper function to store product data in sessionStorage
+const storeProductData = (product: ProductTool): void => {
+  if (typeof window !== 'undefined') {
+    try {
+      const productData = {
+        id: product.id.toString(),
+        name: product.name,
+        image: product.image_url,
+        logo: product.image_url,
+        description: product.description,
+        tag: product.category,
+        tagIcon: '',
+        link: product.link
+      };
+      sessionStorage.setItem(`product_${product.id}`, JSON.stringify(productData));
+    } catch (error) {
+      console.error('Error storing product data:', error);
+    }
+  }
+};
+
 const AllProduct: React.FC = () => {
   const [allProducts, setAllProducts] = useState<ProductTool[]>([]);
   const [displayedProducts, setDisplayedProducts] = useState<ProductTool[]>([]);
@@ -49,45 +78,34 @@ const AllProduct: React.FC = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(18);
-
   const PRODUCTS_PER_LOAD = 18;
-
-  // Restore state on mount
+  
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedProducts = sessionStorage.getItem('loadedProducts');
       const savedIndex = sessionStorage.getItem('currentIndex');
       const savedTimestamp = sessionStorage.getItem('productsTimestamp');
-      
-      // Check if saved data is less than 5 minutes old
       const isDataFresh = savedTimestamp && 
         (Date.now() - parseInt(savedTimestamp)) < 5 * 60 * 1000; // 5 minutes
-      
       if (savedProducts && savedIndex && isDataFresh) {
         try {
           const parsedProducts = JSON.parse(savedProducts);
           setDisplayedProducts(parsedProducts);
           setCurrentIndex(parseInt(savedIndex));
-          
-          // We'll fetch all products but won't show loading since we have displayed products
           fetchProductsInBackground();
           setLoading(false);
           return;
         } catch (error) {
           console.error('Error parsing saved data:', error);
-          // Clear corrupted data
           sessionStorage.removeItem('loadedProducts');
           sessionStorage.removeItem('currentIndex');
           sessionStorage.removeItem('productsTimestamp');
         }
       }
     }
-    
-    // Fetch products with loading state
     fetchProducts();
   }, []);
-
-  // Save state whenever displayedProducts changes (but not allProducts)
+  
   useEffect(() => {
     if (typeof window !== 'undefined' && displayedProducts.length > 0) {
       try {
@@ -226,12 +244,11 @@ const AllProduct: React.FC = () => {
             </h1>
             <section className="w-full mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 ">
             {featuredProducts.map((product) => (
-                <Link key={product.id} href={`/products/${product.id}`}>
+                <Link key={product.id} href={`/tools/${product.id}`}>
                 <article
                     // key={index}
                     className="w-full max-w-sm h-[550px] border border-[#ff9e2c] rounded-3xl mx-auto hover:shadow-2xl transition-all "
                 >
-                    {/* <div className="absolute inset-0 -z-10 rounded-3xl bg-[#b499ff] blur-2xl opacity-40"></div> */}
                     <Image
                     src={product.image}
                     alt="Featured product: OpusClip"
@@ -279,7 +296,8 @@ const AllProduct: React.FC = () => {
         {displayedProducts.map((product) => (
           <Link 
             key={product.id} 
-            href={`/products/${product.id}?name=${encodeURIComponent(product.name)}&description=${encodeURIComponent(product.description)}&image=${encodeURIComponent(product.image_url)}&category=${encodeURIComponent(product.category)}&link=${encodeURIComponent(product.link)}`}
+            href={`/tools/${createSlug(product.name)}`}
+            onClick={() => storeProductData(product)}
           >
             <article className="w-full max-w-sm h-[500px] border rounded-3xl mx-auto transition-all"
               style={{
@@ -368,13 +386,7 @@ const AllProduct: React.FC = () => {
           </button>
         </div>
       )}
-
-      {/* Products count indicator */}
-      {/* <div className="text-center text-gray-600 mb-8">
-        Showing {displayedProducts.length} of {allProducts.length} tools
-      </div> */}
     </main>
   );
 };
-
 export default AllProduct;

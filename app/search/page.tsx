@@ -28,6 +28,32 @@ interface SearchResponse {
   total_results: number;
   results: ProductTool[];
 }
+const createSlug = (name: string): string => {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
+const storeProductData = (product: ProductTool): void => {
+  if (typeof window !== 'undefined') {
+    try {
+      const productData = {
+        id: product.id.toString(),
+        name: product.name,
+        image: product.image_url,
+        logo: product.image_url,
+        description: product.description,
+        tag: product.category,
+        tagIcon: '',
+        link: product.link
+      };
+      sessionStorage.setItem(`product_${product.id}`, JSON.stringify(productData));
+    } catch (error) {
+      console.error('Error storing product data:', error);
+    }
+  }
+};
 
 const SearchContent  = () => {
   const searchParams = useSearchParams();
@@ -168,71 +194,76 @@ const SearchContent  = () => {
           {searchData.results.length > 0 ? (
             <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
               {searchData.results.map((product) => (
-                <Link key={product.id} href={product.link} target="_blank" rel="noopener noreferrer">
-                  <article className="w-full max-w-sm h-[500px] border rounded-3xl mx-auto transition-all"
-                    style={{
-                      borderColor: '#cbd7ea',
-                      boxShadow: '0 0 2px 0 #24417a14, 0 2px 6px 0 #2900577d',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.boxShadow = '0 0 2px 0 #24417a14, 2px 2px 9px 0 #290058';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.boxShadow = '0 0 2px 0 #24417a14, 0 2px 6px 0 #2900577d';
-                    }}
-                  >
-                    <div className="relative h-[240px] rounded-t-3xl overflow-hidden bg-gray-100 flex items-center justify-center">
-                      <Image
-                        src={product.image_url}
-                        alt={`Featured product: ${product.name}`}
-                        width={100}
-                        height={100}
-                        className="object-contain"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = '/api/placeholder/100/100';
-                        }}
-                      />
-                    </div>
-                    <div className="flex justify-between px-4 mt-5">
-                      <div className="flex items-center gap-2">
-                        <div className="w-[50px] h-[50px] rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                          <Image
-                            src={product.image_url}
-                            alt={`${product.name} logo`}
-                            width={40}
-                            height={40}
-                            className="object-contain"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.src = '/api/placeholder/40/40';
-                            }}
-                          />
-                        </div>
-                        <h3 className="font-bold text-black">{product.name}</h3>
-                      </div>
-                      <span className="text-[#7d42fb] mt-3">
-                        <FiExternalLink size={28} />
-                      </span>
-                    </div>
-                    <p className="px-4 mt-5 text-[#46526a] font-semibold line-clamp-3">
-                      {product.description}
-                    </p>
-                    <div className="flex gap-3 mt-5 px-4 items-center flex-wrap">
-                      <div className="w-[30px] h-[30px] flex items-center justify-center">
-                        <span className="text-yellow-500 text-2xl">⭐</span>
-                      </div>
-                      <span className="bg-[#ecf2ff] px-3 py-1 rounded-full text-sm text-black">
-                        {product.category}
-                      </span>
-                      {product.tags && (
-                        <span className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
-                          {product.tags.split(',')[0].trim()}
-                        </span>
-                      )}
-                    </div>
-                  </article>
-                </Link>
+                <Link 
+            key={product.id} 
+            href={`/tools/${createSlug(product.name)}`}
+            onClick={() => storeProductData(product)}
+          >
+            <article className="w-full max-w-sm h-[500px] border rounded-3xl mx-auto transition-all"
+              style={{
+                borderColor: '#cbd7ea',
+                boxShadow: '0 0 2px 0 #24417a14, 0 2px 6px 0 #2900577d',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = '0 0 2px 0 #24417a14, 2px 2px 9px 0 #290058';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = '0 0 2px 0 #24417a14, 0 2px 6px 0 #2900577d';
+              }}
+            >
+              <div className="relative h-[240px] rounded-t-3xl overflow-hidden bg-gray-100 flex items-center justify-center">
+                <Image
+                  src={product.image_url}
+                  alt={`Featured product: ${product.name}`}
+                  width={100}
+                  height={100}
+                  className="object-contain"
+                  onError={(e) => {
+                    // Fallback for broken images
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/api/placeholder/100/100';
+                  }}
+                />
+              </div>
+              <div className="flex justify-between px-4 mt-5">
+                <div className="flex items-center gap-2">
+                  <div className="w-[50px] h-[50px] rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                    <Image
+                      src={product.image_url}
+                      alt={`${product.name} logo`}
+                      width={40}
+                      height={40}
+                      className="object-contain"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/api/placeholder/40/40';
+                      }}
+                    />
+                  </div>
+                  <h3 className="font-bold" style={{color: 'black'}}>{product.name}</h3>
+                </div>
+                <span className="text-[#7d42fb] mt-3">
+                  <FiExternalLink size={28} />
+                </span>
+              </div>
+              <p className="px-4 mt-5 text-[#46526a] font-semibold line-clamp-3">
+                {product.description}
+              </p>
+              <div className="flex gap-3 mt-5 px-4 items-center flex-wrap">
+                <div className="w-[30px] h-[30px] flex items-center justify-center">
+                  <span className="text-yellow-500 text-2xl">⭐</span>
+                </div>
+                <span className="bg-[#ecf2ff] px-3 py-1 rounded-full text-sm" style={{color: 'black'}}>
+                  {product.category}
+                </span>
+                {product.tags && (
+                  <span className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
+                    {product.tags.split(',')[0].trim()}
+                  </span>
+                )}
+              </div>
+            </article>
+          </Link>
               ))}
             </section>
           ) : (
