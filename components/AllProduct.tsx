@@ -1,12 +1,10 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FiExternalLink } from "react-icons/fi";
 import { featuredProducts } from "@/constants";
 
-// Add custom styles for shimmer effect
 const shimmerStyles = `
   @keyframes shimmer {
     0% { background-position: -200% 0; }
@@ -22,7 +20,6 @@ const shimmerStyles = `
   }
 `;
 
-// Inject styles
 if (typeof document !== 'undefined') {
   const styleSheet = document.createElement("style");
   styleSheet.textContent = shimmerStyles;
@@ -51,43 +48,106 @@ const AllProduct: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(20);
+  const [currentIndex, setCurrentIndex] = useState(18);
 
-  const PRODUCTS_PER_LOAD = 20;
+  const PRODUCTS_PER_LOAD = 18;
 
+  // Restore state on mount
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('https://ailast-production.up.railway.app/api/tools/');
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+    if (typeof window !== 'undefined') {
+      const savedProducts = sessionStorage.getItem('loadedProducts');
+      const savedIndex = sessionStorage.getItem('currentIndex');
+      const savedTimestamp = sessionStorage.getItem('productsTimestamp');
+      
+      // Check if saved data is less than 5 minutes old
+      const isDataFresh = savedTimestamp && 
+        (Date.now() - parseInt(savedTimestamp)) < 5 * 60 * 1000; // 5 minutes
+      
+      if (savedProducts && savedIndex && isDataFresh) {
+        try {
+          const parsedProducts = JSON.parse(savedProducts);
+          setDisplayedProducts(parsedProducts);
+          setCurrentIndex(parseInt(savedIndex));
+          
+          // We'll fetch all products but won't show loading since we have displayed products
+          fetchProductsInBackground();
+          setLoading(false);
+          return;
+        } catch (error) {
+          console.error('Error parsing saved data:', error);
+          // Clear corrupted data
+          sessionStorage.removeItem('loadedProducts');
+          sessionStorage.removeItem('currentIndex');
+          sessionStorage.removeItem('productsTimestamp');
         }
-        
-        const data: ProductTool[] = await response.json();
-        setAllProducts(data);
-        setDisplayedProducts(data.slice(0, PRODUCTS_PER_LOAD));
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred while fetching products');
-        console.error('Error fetching products:', err);
-      } finally {
-        setLoading(false);
       }
-    };
-
+    }
+    
+    // Fetch products with loading state
     fetchProducts();
   }, []);
 
+  // Save state whenever displayedProducts changes (but not allProducts)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && displayedProducts.length > 0) {
+      try {
+        sessionStorage.setItem('loadedProducts', JSON.stringify(displayedProducts));
+        sessionStorage.setItem('currentIndex', currentIndex.toString());
+        sessionStorage.setItem('productsTimestamp', Date.now().toString());
+      } catch (error) {
+        console.error('SessionStorage quota exceeded, clearing old data:', error);
+        // Clear all stored data if quota is exceeded
+        sessionStorage.removeItem('loadedProducts');
+        sessionStorage.removeItem('currentIndex');
+        sessionStorage.removeItem('productsTimestamp');
+      }
+    }
+  }, [displayedProducts, currentIndex]);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('https://ailast-production.up.railway.app/api/tools/');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data: ProductTool[] = await response.json();
+      setAllProducts(data);
+      setDisplayedProducts(data.slice(0, PRODUCTS_PER_LOAD));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred while fetching products');
+      console.error('Error fetching products:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchProductsInBackground = async () => {
+    try {
+      const response = await fetch('https://ailast-production.up.railway.app/api/tools/');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data: ProductTool[] = await response.json();
+      setAllProducts(data);
+    } catch (err) {
+      console.error('Background fetch error:', err);
+      // Don't set error state for background fetches
+    }
+  };
+
   const handleLoadMore = () => {
     setLoadingMore(true);
-    
-    // Simulate a small delay for better UX
     setTimeout(() => {
       const nextProducts = allProducts.slice(currentIndex, currentIndex + PRODUCTS_PER_LOAD);
       setDisplayedProducts(prev => [...prev, ...nextProducts]);
       setCurrentIndex(prev => prev + PRODUCTS_PER_LOAD);
       setLoadingMore(false);
+      console.log('>>>>>>>>>>>>>>>>>>>>>>>..');
     }, 500);
   };
 
@@ -213,12 +273,26 @@ const AllProduct: React.FC = () => {
             ))}
             </section>
       <h1 className="font-bold text-4xl mb-10 px-4 text-black mt-20">
-        All AI Tools
+        Latest AI Tools
       </h1>
       <section className="w-full mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
         {displayedProducts.map((product) => (
-          <Link key={product.id} href={product.link} target="_blank" rel="noopener noreferrer">
-            <article className="w-full max-w-sm h-[500px] border border-[#ff9e2c] rounded-3xl mx-auto hover:shadow-2xl hover:shadow-[#7d42fb] transition-all">
+          <Link 
+            key={product.id} 
+            href={`/products/${product.id}?name=${encodeURIComponent(product.name)}&description=${encodeURIComponent(product.description)}&image=${encodeURIComponent(product.image_url)}&category=${encodeURIComponent(product.category)}&link=${encodeURIComponent(product.link)}`}
+          >
+            <article className="w-full max-w-sm h-[500px] border rounded-3xl mx-auto transition-all"
+              style={{
+                borderColor: '#cbd7ea',
+                boxShadow: '0 0 2px 0 #24417a14, 0 2px 6px 0 #2900577d',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = '0 0 2px 0 #24417a14, 2px 2px 9px 0 #290058';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = '0 0 2px 0 #24417a14, 0 2px 6px 0 #2900577d';
+              }}
+            >
               <div className="relative h-[240px] rounded-t-3xl overflow-hidden bg-gray-100 flex items-center justify-center">
                 <Image
                   src={product.image_url}
@@ -296,9 +370,9 @@ const AllProduct: React.FC = () => {
       )}
 
       {/* Products count indicator */}
-      <div className="text-center text-gray-600 mb-8">
+      {/* <div className="text-center text-gray-600 mb-8">
         Showing {displayedProducts.length} of {allProducts.length} tools
-      </div>
+      </div> */}
     </main>
   );
 };

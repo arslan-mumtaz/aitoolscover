@@ -1,7 +1,5 @@
 import AllProduct from "@/components/AllProduct";
-import FeaturedProduct from "@/components/FeaturedProduct";
 import Hero from "@/components/Hero";
-import Image from "next/image";
 
 export default function Home() {
   return (
@@ -11,11 +9,8 @@ export default function Home() {
 
 </div>
   <Hero/>
-  {/* <FeaturedProduct/> */}
   <AllProduct/>
 
-   {/* <Navbar/>
-   <Footer/> */}
   </>
   );
 }

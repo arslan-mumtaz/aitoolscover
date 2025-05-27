@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FiExternalLink, FiSearch } from 'react-icons/fi';
- 
+
 interface ProductTool {
   id: number;
   name: string;
@@ -169,7 +169,18 @@ const SearchContent  = () => {
             <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
               {searchData.results.map((product) => (
                 <Link key={product.id} href={product.link} target="_blank" rel="noopener noreferrer">
-                  <article className="w-full max-w-sm h-[500px] border border-[#ff9e2c] rounded-3xl mx-auto hover:shadow-2xl hover:shadow-[#7d42fb]/25 transition-all">
+                  <article className="w-full max-w-sm h-[500px] border rounded-3xl mx-auto transition-all"
+                    style={{
+                      borderColor: '#cbd7ea',
+                      boxShadow: '0 0 2px 0 #24417a14, 0 2px 6px 0 #2900577d',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.boxShadow = '0 0 2px 0 #24417a14, 2px 2px 9px 0 #290058';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.boxShadow = '0 0 2px 0 #24417a14, 0 2px 6px 0 #2900577d';
+                    }}
+                  >
                     <div className="relative h-[240px] rounded-t-3xl overflow-hidden bg-gray-100 flex items-center justify-center">
                       <Image
                         src={product.image_url}

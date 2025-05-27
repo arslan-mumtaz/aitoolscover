@@ -23,7 +23,7 @@ const FeaturedProduct: React.FC = () => {
               <Image
                 src={product.image}
                 alt="Featured product: OpusClip"
-                width={410} 
+                width={410}
                 height={240}
                 className="rounded-t-3xl"
               />
