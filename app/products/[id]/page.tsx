@@ -3,43 +3,21 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { FiExternalLink } from "react-icons/fi";
 import { FaArrowLeft, FaArrowUp, FaArrowRight } from "react-icons/fa";
-import { similarTools, featuredTools, featuredProducts } from "@/constants";
+import { similarTools, featuredTools } from "@/constants";
+import { getFeaturedProducts } from "@/constants";
 
-export default async function ProductDetail(props: { 
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const { id } = await props.params;
-  const searchParams = await props.searchParams;
-  
-  // Check if product data is passed via search params
-  let product = null;
-  
-  if (searchParams.name && searchParams.description) {
-    // Construct product from search params
-    product = {
-      id,
-      name: searchParams.name as string,
-      image: searchParams.image as string || '/api/placeholder/400/300',
-      logo: searchParams.logo as string || searchParams.image as string || '/api/placeholder/50/50',
-      description: searchParams.description as string,
-      tag: searchParams.category as string || searchParams.tag as string || 'AI Tool',
-      tagIcon: searchParams.tagIcon as string || '',
-      link: searchParams.link as string || '#'
-    };
-  } else {
-    // Fallback to featuredProducts
-    product = featuredProducts.find((item) => item.id.toString() === id);
-  }
-  
+
+
+export default async function ProductDetail(props: { params: Promise<{ id: string }> }) {
+  const { id } = await props.params; // :white_check_mark: Awaiting `params` directly
+  const products = await getFeaturedProducts();
+  console.log(id);
+  const product = products.find((item) => item.id === id);
   if (!product) return notFound();
-
-  const isApiProduct = !featuredProducts.find((item) => item.id.toString() === id);
-
   return (
     <div className="p-8 ml-10">
       {/* Back Link */}
-      <Link href="/" className="flex gap-2 items-center text-[#000418] font-bold hover:underline">
+      <Link href="/products" className="flex gap-2 items-center text-[#000418] font-bold hover:underline">
         <FaArrowLeft size={15} /> <span>Browse all tools</span>
       </Link>
 
@@ -47,14 +25,9 @@ export default async function ProductDetail(props: {
       <div className="grid grid-cols-1 md:grid-cols-2 mt-10 gap-10">
         <div className="flex flex-col gap-6 mt-10">
           <h1 className="text-[#000000] text-5xl font-bold">{product.name}</h1>
-          <Link 
-            href={product.link || '#'} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-white bg-[#7d42fb] border-2 border-black px-3 py-3 w-40 rounded-xl font-semibold hover:bg-black transition hover:-translate-y-1 text-center"
-          >
+          <button className="text-white bg-[#7d42fb] border-2 border-black px-3 py-3 w-40 rounded-xl font-semibold hover:bg-black transition hover:-translate-y-1">
             Visit Website
-          </Link>
+          </button>
           <div>
             <h3 className="text-[#000000] font-bold text-2xl">Overview</h3>
             <p className="text-[#000000] text-md font-semibold leading-8 w-130">
@@ -69,23 +42,21 @@ export default async function ProductDetail(props: {
           </p>
         </div>
 
-        <div className="relative h-[400px] rounded-2xl overflow-hidden bg-gray-100 flex items-center justify-center">
-          <Image
-            src={product.image}
-            alt={product.name}
-            width={isApiProduct ? 200 : 0}
-            height={isApiProduct ? 200 : 0}
-            sizes={isApiProduct ? "200px" : "100vw"}
-            className={isApiProduct ? "object-contain" : "w-full h-auto rounded-2xl"}
-          />
-        </div>
+        <Image
+          src={product.image}
+          alt={product.name}
+          width={0}
+          height={0}
+          sizes="100vw"
+          className="w-full h-auto rounded-2xl"
+        />
       </div>
 
       {/* Similar Tools and Sidebar */}
       <div className="flex flex-col md:flex-row px-4 md:px-6 py-10 gap-8 mt-10">
         {/* Similar Tools */}
         <div className="flex-1">
-          <h1 className="text-4xl font-bold mb-6 text-black">Similar Tools</h1>
+          <h1 className="text-4xl font-bold mb-6">Similar Tools</h1>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {similarTools.map((tool, index) => (
               <article
@@ -108,7 +79,7 @@ export default async function ProductDetail(props: {
                       height={50}
                       className="rounded-full"
                     />
-                    <h3 className="font-bold text-black">{tool.name}</h3>
+                    <h3 className="font-bold">{tool.name}</h3>
                   </div>
                   <FiExternalLink size={28} className="text-[#7d42fb] mt-3" />
                 </div>
@@ -127,7 +98,7 @@ export default async function ProductDetail(props: {
 
         {/* Sidebar: Featured Tools */}
         <aside className="w-full md:w-[300px] mt-2 sticky top-8 self-start">
-          <h2 className="text-4xl font-bold mb-4 text-black">Featured Tools</h2>
+          <h2 className="text-4xl font-bold mb-4">Featured Tools</h2>
           <ul className="space-y-6">
             {featuredTools.map((tool, index) => (
               <li
@@ -142,7 +113,7 @@ export default async function ProductDetail(props: {
                     height={40}
                     className="rounded-full"
                   />
-                  <span className="font-medium text-black">{tool.name}</span>
+                  <span className="font-medium">{tool.name}</span>
                 </div>
                 <FiExternalLink size={24} className="text-[#7d42fb]" />
               </li>
@@ -161,11 +132,9 @@ export default async function ProductDetail(props: {
                 enhance our directory.
               </p>
             </div>
-            <Link href="/submit">
-              <button className="w-[60%] flex gap-2 items-center px-5 py-2 rounded-full bg-black text-white transition hover:-translate-y-1">
-                Submit now <FaArrowRight />
-              </button>
-            </Link>
+            <button className="w-[60%] flex gap-2 items-center px-5 py-2 rounded-full bg-black text-white transition hover:-translate-y-1">
+              Submit now <FaArrowRight />
+            </button>
           </div>
         </aside>
       </div>

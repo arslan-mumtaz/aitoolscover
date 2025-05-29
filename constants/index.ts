@@ -1,5 +1,3 @@
-import { link } from "fs";
-
 export const NAV_LINKS = [
   { href: "/", key: "added_today", label: "Added Today" },
   { href: "/", key: "full_list", label: "Full List" },
@@ -42,7 +40,6 @@ export const featuredProducts = [
       "AI-based video editing platform that simplifies the editing process with automated features and creative templates.",
     tag: "Video",
     tagIcon: "/star.svg",
-    link: "https://www.opus.pro/",
   },
   {
     id: "heygen",
@@ -53,7 +50,6 @@ export const featuredProducts = [
       "Heygen is an AI-driven platform that provides tools for creating personalized video content and virtual avatars.",
     tag: "Avatar",
     tagIcon: "/star.svg",
-    link: "https://www.heygen.com/",
   },
   {
     id: "synthesia",
@@ -64,7 +60,6 @@ export const featuredProducts = [
       "Synthesia is an AI video communications platform that allows users to create professional-quality videos from text.",
     tag: "Video",
     tagIcon: "/star.svg",
-    link: "https://www.synthesia.io/",
   },
 ];
 
@@ -107,7 +102,25 @@ export const similarTools = [
       "RunwayML offers generative video editing tools powered by AI for creators.",
     tag: "Content Creation",
     tagIcon: "/star.svg",
-  }
+  },
+  {
+    name: "TurboDoc",
+    logo: "/turbodoc.png",
+    image: "/tool4.png",
+    description:
+      "Descript is an all-in-one tool for video editing, transcription, and podcasting.",
+    tag: "Automation",
+    tagIcon: "/star.svg",
+  },
+  {
+    name: "Innerly AI",
+    logo: "/innerly.png",
+    image: "/tool5.png",
+    description:
+      "Pictory lets you create short videos from long content using AI summarization.",
+    tag: "Business",
+    tagIcon: "/star.svg",
+  },
 ];
 
 export const featuredTools = [
