@@ -255,7 +255,7 @@ export default function ToolDetailClient({ slug, searchParams }: ToolDetailClien
                 enhance our directory.
               </p>
             </div>
-            <Link href="/submit">
+            <Link href="/login">
               <button className="w-[60%] flex gap-2 items-center px-5 py-2 rounded-full bg-black text-white transition hover:-translate-y-1">
                 Submit now <FaArrowRight />
               </button>

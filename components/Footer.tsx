@@ -45,7 +45,7 @@ function PublishToolsSection() {
               </p>
 
               {/* Button */}
-              <Link href="/submit">
+              <Link href="/login">
                 <button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-8 py-3 rounded-full transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
                   Publish now
                   <svg 
@@ -105,7 +105,7 @@ function PublishToolsSection() {
               </p>
 
               {/* Button */}
-              <Link href="/submit">
+              <Link href="/login">
                 <button className="bg-black hover:bg-gray-800 text-white font-semibold px-8 py-3 rounded-full transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
                   Publish now
                   <svg 
