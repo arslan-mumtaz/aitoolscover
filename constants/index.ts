@@ -37,7 +37,7 @@ export const featuredProducts = [
     id: "submitaitools",
     name: "Submit AI Tools",
     logo: "/submitaitools.jpg",
-    image: "/submitaitoolsimg.png",
+    image: "/submitaitoolsimg.PNG",
     description:
       "A handpicked selection of top AI tools designed to enhance productivity, automate tasks, and optimize workflows. Explore the best AI applications that help streamline your daily operations and improve efficiency across various tasks.",
     tag: "tool",
