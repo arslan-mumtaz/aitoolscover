@@ -34,7 +34,44 @@ const Navbar = () => {
     } else {
       document.documentElement.classList.remove("dark");
     }
-    forceUpdate(n => n + 1); // force re-render
+    forceUpdate(n => n + 1);
+  };
+
+  const handleNavigation = async (link: any) => {
+    if (link.key === 'submit') {
+      const token = localStorage.getItem('token') || "";
+      console.log("Token:", token);
+      if (!token) {
+        console.log("No token provided");
+        window.location.href = '/login';
+        console.log("hi");
+        
+        return;
+      }
+      
+      try {
+        console.log("trying to hit api");
+        const res = await fetch('http://127.0.0.1:8000/api/check-login/', {
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        });
+        
+        if (res.status === 200) {
+          console.log("response 200");
+          window.location.href = '/submit';
+        } else {
+          console.log("response", res.status);
+          window.location.href = '/login';
+        }
+      } catch (error) {
+        console.log("catch error");
+        window.location.href = '/login';
+      }
+    } else {
+      console.log("else case");
+      window.location.href = link.href;
+    }
   };
 
   return (
@@ -49,13 +86,13 @@ const Navbar = () => {
       <div className="flex items-center gap-3">
         <ul className="flex gap-8 items-center font-semibold mt-2">
           {NAV_LINKS.map((link) => (
-            <Link
-              href={link.href}
+            <button
               key={link.key}
+              onClick={() => handleNavigation(link)}
               className="text-black text-black cursor-pointer pb-1.5 transition-all hover:font-bold"
             >
               {link.label}
-            </Link>
+            </button>
           ))}
         </ul>
 

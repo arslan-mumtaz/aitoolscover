@@ -22,12 +22,27 @@ const SignupPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      console.log('Signup data:', formData);
-    }, 2000);
+    try {
+      console.log("trying to hit api");
+      const res = await fetch('https://ailast-production.up.railway.app/api/signup/', {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+        method: 'POST',
+      });
+      
+      if (res.status === 201 || res.status === 200) {
+        console.log("response 200");
+        window.location.href = '/login';
+      } else {
+        console.log("ERROR LOGGING IN", res.status);
+      }
+    } 
+    catch (error) {
+      console.log("catch error");
+    }
+    setIsLoading(false);
   };
 
   const navigateToLogin = () => {
@@ -77,7 +92,7 @@ const SignupPage = () => {
                   name="username"
                   value={formData.username}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#7d42fb] focus:outline-none transition-all duration-300 group-hover:border-gray-300"
+                  className="w-full px-4 py-3 text-black border-2 border-gray-200 rounded-xl focus:border-[#7d42fb] focus:outline-none transition-all duration-300 group-hover:border-gray-300"
                   placeholder="Enter your username"
                   required
                 />
@@ -101,7 +116,7 @@ const SignupPage = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#7d42fb] focus:outline-none transition-all duration-300 group-hover:border-gray-300"
+                  className="w-full px-4 py-3 text-black border-2 border-gray-200 rounded-xl focus:border-[#7d42fb] focus:outline-none transition-all duration-300 group-hover:border-gray-300"
                   placeholder="Enter your email"
                   required
                 />
@@ -125,7 +140,7 @@ const SignupPage = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#7d42fb] focus:outline-none transition-all duration-300 group-hover:border-gray-300"
+                  className="w-full px-4 py-3 text-black border-2 border-gray-200 rounded-xl focus:border-[#7d42fb] focus:outline-none transition-all duration-300 group-hover:border-gray-300"
                   placeholder="Create a strong password"
                   required
                 />

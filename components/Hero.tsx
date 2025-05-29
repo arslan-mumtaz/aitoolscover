@@ -8,7 +8,6 @@ const Hero = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   
   useEffect(() => {
-    // Trigger animations after component mounts
     const timer = setTimeout(() => {
       setIsLoaded(true);
     }, 100);

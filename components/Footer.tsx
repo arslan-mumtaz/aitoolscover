@@ -1,9 +1,23 @@
 // components/CompleteFooterSection.js
+"use client";
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 // Publish Tools Section Component
 function PublishToolsSection() {
+  const [link, setLink] = useState('/login');
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.log("No token provided");
+      setLink('/login');
+    } else {
+      console.log("Token:", token);
+      setLink('/submit');
+    }
+  }, []);
   return (
     <section className="bg-gray-50 py-16 px-6 md:px-12 lg:px-24">
       <div className="max-w-7xl mx-auto">
@@ -45,7 +59,7 @@ function PublishToolsSection() {
               </p>
 
               {/* Button */}
-              <Link href="/login">
+              <Link href={link}>
                 <button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-8 py-3 rounded-full transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
                   Publish now
                   <svg 
@@ -105,7 +119,7 @@ function PublishToolsSection() {
               </p>
 
               {/* Button */}
-              <Link href="/login">
+              <Link href={link}>
                 <button className="bg-black hover:bg-gray-800 text-white font-semibold px-8 py-3 rounded-full transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
                   Publish now
                   <svg 

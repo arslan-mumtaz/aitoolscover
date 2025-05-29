@@ -49,11 +49,12 @@ const SubmitToolForm = () => {
     };
 
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch("https://ailast-production.up.railway.app/api/tools/submit/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "authorization": "token 6f958cac723ec7ef2a36ae674293d2aa8b7b6efb"
+          "authorization": `token ${token}`
         },
         body: JSON.stringify(requestBody),
       });

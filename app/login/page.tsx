@@ -9,8 +9,6 @@ const LoginPage = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -22,12 +20,31 @@ const LoginPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      console.log('Login data:', formData);
-    }, 2000);
+    try {
+      console.log("trying to hit api");
+      const res = await fetch('https://ailast-production.up.railway.app/api/login/', {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+        method: 'POST',
+      });
+      
+      if (res.status === 200) {
+        console.log("response 200");
+        const data = await res.json()
+        console.log("token", data.token);
+        localStorage.setItem('token', data.token);
+
+        window.location.href = '/submit';
+      } else {
+        console.log("ERROR LOGGING IN", res.status);
+      }
+    } 
+    catch (error) {
+      console.log("catch error");
+    }
+    setIsLoading(false);
   };
 
   const navigateToSignup = () => {
@@ -82,7 +99,7 @@ const LoginPage = () => {
                   name="username"
                   value={formData.username}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#7d42fb] focus:outline-none transition-all duration-300 group-hover:border-gray-300"
+                  className="w-full px-4 py-3 text-black border-2 border-gray-200 rounded-xl focus:border-[#7d42fb] focus:outline-none transition-all duration-300 group-hover:border-gray-300"
                   placeholder="Enter your username"
                   required
                 />
@@ -106,7 +123,7 @@ const LoginPage = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#7d42fb] focus:outline-none transition-all duration-300 group-hover:border-gray-300"
+                  className="w-full px-4 py-3 text-black border-2 border-gray-200 rounded-xl focus:border-[#7d42fb] focus:outline-none transition-all duration-300 group-hover:border-gray-300"
                   placeholder="Enter your password"
                   required
                 />
@@ -132,13 +149,7 @@ const LoginPage = () => {
             {/* Remember me and forgot password */}
             <div className="flex items-center justify-between">
               <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 text-[#7d42fb] bg-gray-100 border-gray-300 rounded focus:ring-[#7d42fb] focus:ring-2"
-                />
-                <span className="ml-2 text-sm text-gray-600">Remember me</span>
+                
               </label>
               <button
                 type="button"

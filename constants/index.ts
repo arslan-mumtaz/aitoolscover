@@ -8,7 +8,7 @@ export const NAV_LINKS = [
   { href: "/", key: "ai_categories", label: "AI Categories" },
   { href: "/", key: "prompts", label: "Prompts" },
   { href: "/", key: "top_picks", label: "Top Picks" },
-  { href: "/login", key: "submit", label: "Submit" },
+  { href: "", key: "submit", label: "Submit" },
 ];
 
 export const categories = [
