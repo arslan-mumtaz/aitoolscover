@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { categories } from "@/constants";
-import Router from "next/router";
 
 const Hero = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -18,6 +17,13 @@ const Hero = () => {
       handleSearch();
     }
   };
+
+  const handleCategoryClick = (category: string) => {
+    // Convert category to URL-friendly format
+    const categorySlug = category.toLowerCase().replace(/\s+/g, '-');
+    window.location.href = `/category/${encodeURIComponent(categorySlug)}`;
+  };
+
   return (
     <>
       <section className="relative flex justify-between w-[1200px] h-[370px] mx-auto bg-[#ecf2ff] rounded-3xl mt-10">
@@ -72,7 +78,8 @@ const Hero = () => {
           {categories.map((item, index) => (
             <button
               key={index}
-              className="bg-transparent text-[#000] border border-[#7d42fb] text-xl font-bold py-2 rounded-full w-full"
+              onClick={() => handleCategoryClick(item)}
+              className="bg-transparent text-[#000] border border-[#7d42fb] text-xl font-bold py-2 rounded-full w-full hover:bg-[#7d42fb] hover:text-white transition-colors duration-300"
             >
               {item}
             </button>
