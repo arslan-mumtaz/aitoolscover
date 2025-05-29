@@ -8,6 +8,7 @@ import { NAV_LINKS } from "@/constants";
 const Navbar = () => {
   const [theme, setTheme] = useState("light");
 
+
   useEffect(() => {
     const storedTheme = localStorage.getItem("theme");
     const prefersDark = window.matchMedia(
@@ -23,6 +24,7 @@ const Navbar = () => {
     }
   }, []);
 
+  const [, forceUpdate] = useState(0);
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
@@ -32,14 +34,15 @@ const Navbar = () => {
     } else {
       document.documentElement.classList.remove("dark");
     }
+    forceUpdate(n => n + 1); // force re-render
   };
 
   return (
-    <nav className="w-[95%] mx-auto flex justify-between px-4 py-5 bg-white dark:bg-[#121212] transition-all duration-300">
+    <nav className="w-[100%] mx-auto flex justify-between px-4 py-5 bg-white transition-all duration-300">
       <Link href="/" className="flex items-center justify-center gap-2">
-        <Image src="/ai_logo.png" alt="ai" width={50} height={50} />
-        <p className="font-bold text-xl text-black dark:text-white">
-          Tools Radar
+        <Image src="/logo.png" alt="ai" width={50} height={50} />
+        <p className="font-bold text-2xl text-[#121212]">
+          Tools Cover
         </p>
       </Link>
 
@@ -49,7 +52,7 @@ const Navbar = () => {
             <Link
               href={link.href}
               key={link.key}
-              className="text-black dark:text-white cursor-pointer pb-1.5 transition-all hover:font-bold"
+              className="text-black text-black cursor-pointer pb-1.5 transition-all hover:font-bold"
             >
               {link.label}
             </Link>

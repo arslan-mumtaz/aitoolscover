@@ -174,7 +174,17 @@ export default function ToolDetailClient({ slug, searchParams }: ToolDetailClien
             {similarTools.map((tool, index) => (
               <article
                 key={index}
-                className="w-full max-w-sm h-[500px] border border-purple-100 rounded-3xl shadow-md hover:shadow-xl transition"
+                className="w-full max-w-sm h-[500px] border rounded-3xl mx-auto transition-all"
+                style={{
+                  borderColor: '#cbd7ea',
+                  boxShadow: '0 0 2px 0 #24417a14, 0 2px 6px 0 #2900577d',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 0 2px 0 #24417a14, 2px 2px 9px 0 #290058';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = '0 0 2px 0 #24417a14, 0 2px 6px 0 #2900577d';
+                }}
               >
                 <Image
                   src={tool.image}
