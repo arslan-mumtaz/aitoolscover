@@ -12,24 +12,24 @@ export const NAV_LINKS = [
 ];
 
 export const categories = [
-  "Productivity",
   "Business",
-  "Avatar",
-  "Podcasting",
-  "Chat",
-  "Voice",
-  "Content Creation",
-  "Video",
-  "Advertisement",
-  "Chatbot",
-  "Automation",
-  "Design",
-  "Social Media",
-  "Copywriting",
-  "Management",
-  "Marketing",
   "Education",
-  "SEO",
+  "Environmental",
+  "Nutrition",
+  "Government",
+  "Health",
+  "Language",
+  "Media",
+  "Blockchain",
+  "Lifestyle",
+  "Security ",
+  "Sports",
+  "Engineering",
+  "Travel",
+  "Utilities",
+  "Communication",
+  "Tech",
+  "Privacy"
 ];
 
 export const featuredProducts = [

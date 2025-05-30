@@ -14,18 +14,22 @@ const SubmitToolForm = () => {
   const [errorMessage, setErrorMessage] = useState('');
 
   const categories = [
-    'Writing',
-    'Code Generation',
-    'Image Generation',
-    'Video Generation',
-    'Audio Generation',
-    'Data Analysis',
-    'Productivity',
-    'Marketing',
-    'Education',
-    'Design',
-    'Research',
-    'Other'
+    'Business & Productivity',
+    'Education & Knowledge',
+    'Environmental',
+    'Food & Nutrition',
+    'Government & Public Sector',
+    'Health & Wellness',
+    'Language & Communication',
+    'Media & Entertainment',
+    'NFT & Blockchain',
+    'Personal & Lifestyle',
+    'Security & Privacy',
+    'Sports',
+    'Tech & Engineering',
+    'Travel & Navigation',
+    'Utilities & Tools',
+    'Other',
   ];
 
   const handleSubmit = async (e: { preventDefault: () => void; }) => {
