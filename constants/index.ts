@@ -111,9 +111,7 @@ export const similarTools = [
 ];
 
 export const featuredTools = [
-  { name: "OpusClip", logo: "/opus.png" },
-  { name: "Heygen", logo: "/heygen.jpeg" },
-  { name: "Synthesia", logo: "/synth.jpeg" },
-  { name: "Frase", logo: "/frase.png" },
-  { name: "Alli AI", logo: "/alli.jpeg" },
+  { name: "Submit AI Tools", logo: "/submitaitools.jpg", link: "https://submitaitools.org/" },
+  { name: "Heygen", logo: "/heygen.jpeg", link: "https://www.heygen.com/" },
+  { name: "Synthesia", logo: "/synth.jpeg", link: "https://www.synthesia.io/" },
 ];

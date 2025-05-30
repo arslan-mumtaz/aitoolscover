@@ -170,7 +170,7 @@ const Hero = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={handleKeyPress}
-              className="flex-1 outline-none bg-transparent text-sm px-2 placeholder-gray-400"
+              className="flex-1 outline-none bg-transparent text-sm px-2 placeholder-gray-400 text-black"
             />
             <button 
               onClick={handleSearch}

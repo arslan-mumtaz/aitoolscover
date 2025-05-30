@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FiExternalLink } from "react-icons/fi";
 import { FaArrowLeft, FaArrowUp, FaArrowRight } from "react-icons/fa";
-import { similarTools, featuredTools, featuredProducts } from "@/constants";
+import { featuredTools, featuredProducts } from "@/constants";
 
 // Helper function to create URL-friendly slugs
 const createSlug = (name: string): string => {
@@ -13,6 +13,29 @@ const createSlug = (name: string): string => {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 };
+
+// Interface for API similar tools
+interface SimilarTool {
+  id: number;
+  name: string;
+  link: string;
+  image_url: string;
+  description: string;
+  tags: string | null;
+  created_at: string;
+  is_approved: boolean;
+  click_count: number;
+  views: number;
+  developer: string | null;
+  category: string;
+  submitted_by: string | null;
+}
+
+interface SimilarToolsResponse {
+  category: string;
+  total_results: number;
+  results: SimilarTool[];
+}
 
 interface ToolDetailClientProps {
   slug: string;
@@ -23,6 +46,34 @@ export default function ToolDetailClient({ slug, searchParams }: ToolDetailClien
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [similarTools, setSimilarTools] = useState<SimilarTool[]>([]);
+  const [similarToolsLoading, setSimilarToolsLoading] = useState(false);
+  const [similarToolsError, setSimilarToolsError] = useState<string | null>(null);
+
+  // Function to fetch similar tools from API
+  const fetchSimilarTools = async (tag: string) => {
+    if (!tag) return;
+    
+    setSimilarToolsLoading(true);
+    setSimilarToolsError(null);
+    
+    try {
+      const response = await fetch(`https://ailast-production.up.railway.app/api/tools/similar/?tag=${encodeURIComponent(tag)}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data: SimilarToolsResponse = await response.json();
+      setSimilarTools(data.results || []);
+    } catch (error) {
+      console.error('Error fetching similar tools:', error);
+      setSimilarToolsError('Failed to load similar tools');
+      setSimilarTools([]);
+    } finally {
+      setSimilarToolsLoading(false);
+    }
+  };
 
   useEffect(() => {
     const loadProduct = () => {
@@ -81,6 +132,13 @@ export default function ToolDetailClient({ slug, searchParams }: ToolDetailClien
 
     loadProduct();
   }, [slug, searchParams]);
+
+  // Fetch similar tools when product is loaded
+  useEffect(() => {
+    if (product && product.tag) {
+      fetchSimilarTools(product.tag);
+    }
+  }, [product]);
 
   if (loading) {
     return (
@@ -170,53 +228,94 @@ export default function ToolDetailClient({ slug, searchParams }: ToolDetailClien
         {/* Similar Tools */}
         <div className="flex-1">
           <h1 className="text-4xl font-bold mb-6 text-black">Similar Tools</h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {similarTools.map((tool, index) => (
-              <article
-                key={index}
-                className="w-full max-w-sm h-[500px] border rounded-3xl mx-auto transition-all"
-                style={{
-                  borderColor: '#cbd7ea',
-                  boxShadow: '0 0 2px 0 #24417a14, 0 2px 6px 0 #2900577d',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = '0 0 2px 0 #24417a14, 2px 2px 9px 0 #290058';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = '0 0 2px 0 #24417a14, 0 2px 6px 0 #2900577d';
-                }}
-              >
-                <Image
-                  src={tool.image}
-                  alt={tool.name}
-                  width={410}
-                  height={240}
-                  className="rounded-t-3xl"
-                />
-                <div className="flex justify-between px-4 mt-5">
-                  <div className="flex items-center gap-2">
+          
+          {similarToolsLoading && (
+            <div className="flex justify-center items-center h-32">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 border-4 border-[#7d42fb] border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-lg font-semibold text-gray-700">Loading similar tools...</span>
+              </div>
+            </div>
+          )}
+
+          {similarToolsError && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+              <p className="text-red-600 font-medium">{similarToolsError}</p>
+            </div>
+          )}
+
+          {!similarToolsLoading && !similarToolsError && similarTools.length === 0 && (
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-8 text-center">
+              <p className="text-gray-600 font-medium">No similar tools found for this category.</p>
+            </div>
+          )}
+
+          {!similarToolsLoading && similarTools.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {similarTools.map((tool) => (
+                <article
+                  key={tool.id}
+                  className="w-full max-w-sm h-[500px] border rounded-3xl mx-auto transition-all cursor-pointer"
+                  style={{
+                    borderColor: '#cbd7ea',
+                    boxShadow: '0 0 2px 0 #24417a14, 0 2px 6px 0 #2900577d',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = '0 0 2px 0 #24417a14, 2px 2px 9px 0 #290058';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = '0 0 2px 0 #24417a14, 0 2px 6px 0 #2900577d';
+                  }}
+                  onClick={() => {
+                    if (tool.link) {
+                      window.open(tool.link, '_blank', 'noopener,noreferrer');
+                    }
+                  }}
+                >
+                  <div className="h-[240px] bg-gray-100 rounded-t-3xl flex items-center justify-center overflow-hidden">
                     <Image
-                      src={tool.logo}
+                      src={tool.image_url}
                       alt={tool.name}
-                      width={50}
-                      height={50}
-                      className="rounded-full"
+                      width={410}
+                      height={240}
+                      className="object-cover w-full h-full rounded-t-3xl"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/api/placeholder/400/300';
+                      }}
                     />
-                    <h3 className="font-bold text-black">{tool.name}</h3>
                   </div>
-                  <FiExternalLink size={28} className="text-[#7d42fb] mt-3" />
-                </div>
-                <p className="px-4 mt-5 text-[#46526a] font-semibold">
-                  {tool.description}
-                </p>
-                <div className="flex gap-3 mt-5 px-4 items-center">
-                  <span className="bg-[#ecf2ff] text-sm px-5 py-1 font-semibold rounded-full">
-                    {tool.tag}
-                  </span>
-                </div>
-              </article>
-            ))}
-          </div>
+                  <div className="flex justify-between px-4 mt-5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-[50px] h-[50px] bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                        <Image
+                          src={tool.image_url}
+                          alt={tool.name}
+                          width={50}
+                          height={50}
+                          className="object-cover w-full h-full rounded-full"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/api/placeholder/50/50';
+                          }}
+                        />
+                      </div>
+                      <h3 className="font-bold text-black truncate">{tool.name}</h3>
+                    </div>
+                    <FiExternalLink size={28} className="text-[#7d42fb] mt-3 flex-shrink-0" />
+                  </div>
+                  <p className="px-4 mt-5 text-[#46526a] font-semibold line-clamp-3">
+                    {tool.description}
+                  </p>
+                  <div className="flex gap-3 mt-5 px-4 items-center">
+                    <span className="bg-[#ecf2ff] px-3 py-1 rounded-full text-sm" style={{color: 'black'}}>
+                      {tool.category}
+                    </span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Sidebar: Featured Tools */}
@@ -224,6 +323,7 @@ export default function ToolDetailClient({ slug, searchParams }: ToolDetailClien
           <h2 className="text-4xl font-bold mb-4 text-black">Featured Tools</h2>
           <ul className="space-y-6">
             {featuredTools.map((tool, index) => (
+              <Link href={tool.link} target='_blank' key={index}>
               <li
                 key={index}
                 className="flex items-center justify-between p-3 py-5 border border-[#cecece] rounded-xl transition"
@@ -240,6 +340,7 @@ export default function ToolDetailClient({ slug, searchParams }: ToolDetailClien
                 </div>
                 <FiExternalLink size={24} className="text-[#7d42fb]" />
               </li>
+              </Link>
             ))}
           </ul>
 

@@ -290,7 +290,7 @@ const AllProduct: React.FC = () => {
                     width={30}
                     height={30}
                   />
-                  <span className="bg-[#ecf2ff] px-5 py-1 rounded-full">
+                  <span className="bg-[#ecf2ff] px-5 py-1 rounded-full" style={{color: 'black'}}>
                     {product.tag}
                   </span>
                 </div>
