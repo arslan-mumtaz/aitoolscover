@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { FiExternalLink } from 'react-icons/fi';
 
 type Tool = {
   id: string | number;
@@ -297,6 +298,7 @@ const CategoryPage = () => {
                     <h3 className="font-bold text-lg text-gray-900 truncate">
                       {tool.name}
                     </h3>
+                    
                     <p className="text-sm text-gray-500 truncate">
                       {tool.category}
                     </p>
@@ -308,8 +310,8 @@ const CategoryPage = () => {
                 </p>
                 
                 <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#ecf2ff] text-[#7d42fb]">
-                    Free
+                  <span className="text-[#7d42fb] mt-3">
+                      <FiExternalLink size={28} />
                   </span>
                   <div className="flex items-center space-x-2 text-xs text-gray-500">
                     {(tool.views ?? 0) > 0 && (
