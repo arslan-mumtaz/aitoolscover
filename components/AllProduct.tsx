@@ -125,7 +125,7 @@ const AllProduct: React.FC = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://ailast-production.up.railway.app/api/tools/');
+      const response = await fetch('https://ailast-production.up.railway.app/api/tools/pagination');
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
