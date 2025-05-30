@@ -120,10 +120,18 @@ const Hero = () => {
         .description {
           animation: slideInFromTop 0.8s ease-out 0.4s both;
         }
+
+        /* Mobile-specific adjustments */
+        @media (max-width: 768px) {
+          .decorative-image {
+            display: none;
+          }
+        }
       `}</style>
 
-      <section className={`relative flex justify-between w-[1200px] h-[370px] mx-auto bg-[#ecf2ff] rounded-3xl mt-10 hero-section ${isLoaded ? 'loaded' : ''}`}>
-        <div className="absolute flex flex-col space-y-10 justify-center top-[20%] left-[5%]">
+      <section className={`relative flex justify-between w-full max-w-[1200px] min-h-[370px] h-auto mx-auto bg-[#ecf2ff] rounded-3xl mt-10 px-4 sm:px-6 lg:px-0 hero-section ${isLoaded ? 'loaded' : ''}`}>
+        {/* Decorative Images - Desktop Only */}
+        <div className="hidden lg:flex absolute flex-col space-y-10 justify-center top-[20%] left-[5%]">
           <div className="decorative-image">
             <Image src="/hero1.png" alt="hero" width={125} height={109} />
           </div>
@@ -132,7 +140,7 @@ const Hero = () => {
           </div>
         </div>
         
-        <div className="absolute flex flex-col space-y-10 justify-center top-[25%] left-[23%]">
+        <div className="hidden lg:flex absolute flex-col space-y-10 justify-center top-[25%] left-[23%]">
           <div className="decorative-image" style={{ animationDelay: '0.7s' }}>
             <Image src="/hero4.png" alt="hero" width={61} height={19} />
           </div>
@@ -141,20 +149,21 @@ const Hero = () => {
           </div>
         </div>
 
-        <div className="absolute flex flex-col space-y-4 top-[20%] left-[37%]">
-          <h1 className="text-3xl md:text-4xl font-bold text-black mb-4 leading-12 main-heading">
-            Discover the Top AI tools
-            <div className="text-center pr-12">with AI Tools Cover!</div>
+        {/* Main Content */}
+        <div className="w-full flex flex-col items-center justify-center space-y-4 py-8 lg:py-0 lg:absolute lg:top-[20%] lg:left-[37%] lg:w-auto">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black mb-4 leading-tight text-center main-heading">
+            <span className="block">Discover the Top AI tools</span>
+            <span className="block">with AI Tools Cover!</span>
           </h1>
 
-          <p className="text-[#272729] font-semibold max-w-xl text-base md:text-md mb-6 description">
+          <p className="text-[#272729] font-semibold max-w-xl text-sm sm:text-base lg:text-md mb-6 text-center description px-4 lg:px-0">
             Your gateway to the finest AI tools, meticulously organized
-            <span className="block text-center">
+            <span className="block">
               and categorized for easy access.
             </span>
           </p>
 
-          <div className="relative flex items-center w-[70%] rounded-full border-2 border-[#7d42fb] bg-white shadow-md px-4 py-4 pl-2 ml-12 text-[black] search-block transform hover:shadow-lg hover:scale-105 transition-all duration-300">
+          <div className="relative flex items-center w-full max-w-md lg:w-[70%] rounded-full border-2 border-[#7d42fb] bg-white shadow-md px-4 py-3 lg:py-4 search-block transform hover:shadow-lg hover:scale-105 transition-all duration-300">
             <input
               type="text"
               placeholder="Search for..."
@@ -165,14 +174,15 @@ const Hero = () => {
             />
             <button 
               onClick={handleSearch}
-              className="absolute bg-[#7d42fb] right-[2%] text-white text-sm font-semibold px-5 py-2 rounded-full hover:bg-[#6a35d9] transition-all duration-300 transform hover:scale-105 active:scale-95"
+              className="absolute bg-[#7d42fb] right-[2%] text-white text-xs sm:text-sm font-semibold px-3 sm:px-5 py-2 rounded-full hover:bg-[#6a35d9] transition-all duration-300 transform hover:scale-105 active:scale-95"
             >
               Search
             </button>
           </div>
         </div>
         
-        <div className="absolute flex flex-col space-y-10 justify-center top-[25%] left-[83%]">
+        {/* Right Decorative Images - Desktop Only */}
+        <div className="hidden lg:flex absolute flex-col space-y-10 justify-center top-[25%] left-[83%]">
           <div className="decorative-image" style={{ animationDelay: '0.8s' }}>
             <Image src="/hero4.png" alt="hero" width={61} height={19} />
           </div>
@@ -182,13 +192,14 @@ const Hero = () => {
         </div>
       </section>
 
-      <section className="w-[1200px] h-[320px] mx-auto mt-14 categories-section">
-        <div className="grid grid-cols-6 gap-6">
+      {/* Categories Section */}
+      <section className="w-full max-w-[1200px] mx-auto mt-14 px-4 sm:px-6 lg:px-0 categories-section">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 lg:gap-6">
           {categories.map((item, index) => (
             <button
               key={index}
               onClick={() => handleCategoryClick(item)}
-              className="category-button bg-transparent text-[#000] border border-[#7d42fb] text-xl font-bold py-2 rounded-full w-full hover:bg-[#7d42fb] hover:text-white transition-all duration-300 transform hover:scale-110 hover:shadow-lg active:scale-95"
+              className="category-button bg-transparent text-[#000] border border-[#7d42fb] text-sm sm:text-lg lg:text-xl font-bold py-2 sm:py-3 rounded-full w-full hover:bg-[#7d42fb] hover:text-white transition-all duration-300 transform hover:scale-110 hover:shadow-lg active:scale-95"
               style={{ 
                 animationDelay: `${0.7 + (index * 0.1)}s`,
                 opacity: 0

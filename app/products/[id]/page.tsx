@@ -25,9 +25,13 @@ export default async function ProductDetail(props: { params: Promise<{ id: strin
       <div className="grid grid-cols-1 md:grid-cols-2 mt-10 gap-10">
         <div className="flex flex-col gap-6 mt-10">
           <h1 className="text-[#000000] text-5xl font-bold">{product.name}</h1>
-          <button className="text-white bg-[#7d42fb] border-2 border-black px-3 py-3 w-40 rounded-xl font-semibold hover:bg-black transition hover:-translate-y-1">
-            Visit Website
-          </button>
+          <Link 
+            href={product.link || '#'} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-white bg-[#7d42fb] border-2 border-black px-3 py-3 w-40 rounded-xl font-semibold hover:bg-black transition hover:-translate-y-1 text-center">
+              Visit Website
+          </Link>
           <div>
             <h3 className="text-[#000000] font-bold text-2xl">Overview</h3>
             <p className="text-[#000000] text-md font-semibold leading-8 w-130">

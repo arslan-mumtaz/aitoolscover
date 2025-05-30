@@ -227,7 +227,7 @@ const AllProduct: React.FC = () => {
   if (error) {
     return (
       <main className="px-4 md:px-16">
-        <h1 className="font-bold text-4xl mb-10 px-4 text-black">
+        <h1 className="font-bold text-4xl mt-14 mb-10 px-4 text-black">
           Featured Tools
         </h1>
         <div className="flex justify-center items-center h-64">
@@ -239,7 +239,7 @@ const AllProduct: React.FC = () => {
 
   return (
     <main className="px-4 md:px-16">
-        <h1 className="font-bold text-4xl mb-10 px-4 text-black">
+        <h1 className="font-bold text-4xl mt-14 mb-10 px-4 text-black">
             Featured Tools
             </h1>
             <section className="w-full mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 ">
