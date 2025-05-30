@@ -360,7 +360,7 @@ const CategoryPage = () => {
                   Loading...
                 </span>
               ) : (
-                `Load More Tools (${displayedTools.length} of ${allTools.length})`
+                `Load More Tools`
               )}
             </button>
           </div>
