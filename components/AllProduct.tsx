@@ -72,68 +72,80 @@ const storeProductData = (product: ProductTool): void => {
 };
 
 const AllProduct: React.FC = () => {
-  const [allProducts, setAllProducts] = useState<ProductTool[]>([]);
   const [displayedProducts, setDisplayedProducts] = useState<ProductTool[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(18);
+  const [currentOffset, setCurrentOffset] = useState(0);
+  const [hasMoreProducts, setHasMoreProducts] = useState(true);
   const PRODUCTS_PER_LOAD = 18;
   
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const savedProducts = sessionStorage.getItem('loadedProducts');
-      const savedIndex = sessionStorage.getItem('currentIndex');
+      const savedProducts = sessionStorage.getItem('displayedProducts');
+      const savedOffset = sessionStorage.getItem('currentOffset');
       const savedTimestamp = sessionStorage.getItem('productsTimestamp');
+      const savedHasMore = sessionStorage.getItem('hasMoreProducts');
+      
       const isDataFresh = savedTimestamp && 
         (Date.now() - parseInt(savedTimestamp)) < 5 * 60 * 1000; // 5 minutes
-      if (savedProducts && savedIndex && isDataFresh) {
+      
+      if (savedProducts && savedOffset && isDataFresh) {
         try {
           const parsedProducts = JSON.parse(savedProducts);
           setDisplayedProducts(parsedProducts);
-          setCurrentIndex(parseInt(savedIndex));
-          fetchProductsInBackground();
+          setCurrentOffset(parseInt(savedOffset));
+          setHasMoreProducts(savedHasMore === 'true');
           setLoading(false);
           return;
         } catch (error) {
           console.error('Error parsing saved data:', error);
-          sessionStorage.removeItem('loadedProducts');
-          sessionStorage.removeItem('currentIndex');
-          sessionStorage.removeItem('productsTimestamp');
+          clearCachedData();
         }
       }
     }
-    fetchProducts();
+    fetchInitialProducts();
   }, []);
   
+  // Save to cache whenever displayedProducts or currentOffset changes
   useEffect(() => {
     if (typeof window !== 'undefined' && displayedProducts.length > 0) {
       try {
-        sessionStorage.setItem('loadedProducts', JSON.stringify(displayedProducts));
-        sessionStorage.setItem('currentIndex', currentIndex.toString());
+        sessionStorage.setItem('displayedProducts', JSON.stringify(displayedProducts));
+        sessionStorage.setItem('currentOffset', currentOffset.toString());
         sessionStorage.setItem('productsTimestamp', Date.now().toString());
+        sessionStorage.setItem('hasMoreProducts', hasMoreProducts.toString());
       } catch (error) {
         console.error('SessionStorage quota exceeded, clearing old data:', error);
-        // Clear all stored data if quota is exceeded
-        sessionStorage.removeItem('loadedProducts');
-        sessionStorage.removeItem('currentIndex');
-        sessionStorage.removeItem('productsTimestamp');
+        clearCachedData();
       }
     }
-  }, [displayedProducts, currentIndex]);
+  }, [displayedProducts, currentOffset, hasMoreProducts]);
 
-  const fetchProducts = async () => {
+  const clearCachedData = () => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('displayedProducts');
+      sessionStorage.removeItem('currentOffset');
+      sessionStorage.removeItem('productsTimestamp');
+      sessionStorage.removeItem('hasMoreProducts');
+    }
+  };
+
+  const fetchInitialProducts = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://ailast-production.up.railway.app/api/tools/pagination');
+      const response = await fetch(`https://ailast-production.up.railway.app/api/tools/pagination?limit=${PRODUCTS_PER_LOAD}&offset=0`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
       const data: ProductTool[] = await response.json();
-      setAllProducts(data);
-      setDisplayedProducts(data.slice(0, PRODUCTS_PER_LOAD));
+      setDisplayedProducts(data);
+      setCurrentOffset(PRODUCTS_PER_LOAD);
+      
+      // If we got less than requested, we've reached the end
+      setHasMoreProducts(data.length === PRODUCTS_PER_LOAD);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred while fetching products');
       console.error('Error fetching products:', err);
@@ -142,34 +154,37 @@ const AllProduct: React.FC = () => {
     }
   };
 
-  const fetchProductsInBackground = async () => {
+  const handleLoadMore = async () => {
+    if (loadingMore || !hasMoreProducts) return;
+    
+    setLoadingMore(true);
+    
     try {
-      const response = await fetch('https://ailast-production.up.railway.app/api/tools/');
+      const response = await fetch(`https://ailast-production.up.railway.app/api/tools/pagination?limit=${PRODUCTS_PER_LOAD}&offset=${currentOffset}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      const data: ProductTool[] = await response.json();
-      setAllProducts(data);
+      const newProducts: ProductTool[] = await response.json();
+      
+      // Add new products to existing ones
+      setDisplayedProducts(prev => [...prev, ...newProducts]);
+      setCurrentOffset(prev => prev + PRODUCTS_PER_LOAD);
+      
+      // If we got less than requested, we've reached the end
+      if (newProducts.length < PRODUCTS_PER_LOAD) {
+        setHasMoreProducts(false);
+      }
+      
+      console.log(`Loaded ${newProducts.length} more products. Total: ${displayedProducts.length + newProducts.length}`);
     } catch (err) {
-      console.error('Background fetch error:', err);
-      // Don't set error state for background fetches
+      setError(err instanceof Error ? err.message : 'An error occurred while loading more products');
+      console.error('Error loading more products:', err);
+    } finally {
+      setLoadingMore(false);
     }
   };
-
-  const handleLoadMore = () => {
-    setLoadingMore(true);
-    setTimeout(() => {
-      const nextProducts = allProducts.slice(currentIndex, currentIndex + PRODUCTS_PER_LOAD);
-      setDisplayedProducts(prev => [...prev, ...nextProducts]);
-      setCurrentIndex(prev => prev + PRODUCTS_PER_LOAD);
-      setLoadingMore(false);
-      console.log('>>>>>>>>>>>>>>>>>>>>>>>..');
-    }, 500);
-  };
-
-  const hasMoreProducts = currentIndex < allProducts.length;
 
   if (loading) {
     return (
@@ -230,8 +245,18 @@ const AllProduct: React.FC = () => {
         <h1 className="font-bold text-4xl mt-14 mb-10 px-4 text-black">
           Featured Tools
         </h1>
-        <div className="flex justify-center items-center h-64">
+        <div className="flex flex-col justify-center items-center h-64 gap-4">
           <div className="text-lg text-red-600">Error: {error}</div>
+          <button 
+            onClick={() => {
+              setError(null);
+              clearCachedData();
+              fetchInitialProducts();
+            }}
+            className="bg-[#7d42fb] hover:bg-[#572eaf] text-white font-semibold py-2 px-6 rounded-full transition-all duration-300"
+          >
+            Try Again
+          </button>
         </div>
       </main>
     );
@@ -257,7 +282,6 @@ const AllProduct: React.FC = () => {
                   e.currentTarget.style.boxShadow = '0 0 2px 0 #24417a14, 0 2px 6px 0 #2900577d';
                 }}
               >
-                {/* <div className="absolute inset-0 -z-10 rounded-3xl bg-[#b499ff] blur-2xl opacity-40"></div> */}
                 <Image
                   src={product.image}
                   alt="Featured product: OpusClip"
@@ -299,7 +323,7 @@ const AllProduct: React.FC = () => {
           ))}
             </section>
       <h1 className="font-bold text-4xl mb-10 px-4 text-black mt-20">
-        Latest AI Tools
+        Latest AI Tools ({displayedProducts.length} tools loaded)
       </h1>
       <section className="w-full mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
         {displayedProducts.map((product) => (
@@ -387,15 +411,24 @@ const AllProduct: React.FC = () => {
             {loadingMore ? (
               <div className="flex items-center gap-2">
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Loading more...
+                Loading more tools...
               </div>
             ) : (
-              `Load More Tools (${Math.min(PRODUCTS_PER_LOAD, allProducts.length - currentIndex)} more)`
+              `Load More Tools (${PRODUCTS_PER_LOAD} more)`
             )}
           </button>
+        </div>
+      )}
+
+      {!hasMoreProducts && displayedProducts.length > 0 && (
+        <div className="flex justify-center mt-12 mb-8">
+          <p className="text-gray-500 font-semibold">
+            🎉 You've reached the end! All tools have been loaded.
+          </p>
         </div>
       )}
     </main>
   );
 };
+
 export default AllProduct;
