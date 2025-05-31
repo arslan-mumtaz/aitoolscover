@@ -23,7 +23,8 @@ const CategoryPage = () => {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(18);
+  const [currentOffset, setCurrentOffset] = useState(0);
+  const [hasMoreTools, setHasMoreTools] = useState(true);
   const [totalResults, setTotalResults] = useState(0);
 
   const TOOLS_PER_LOAD = 18;
@@ -38,59 +39,69 @@ const CategoryPage = () => {
       
       // Check for cached data first
       if (typeof window !== 'undefined') {
-        const cacheKey = `tools_${decodedCategory}`;
-        const savedTools = sessionStorage.getItem(cacheKey);
-        const savedTimestamp = sessionStorage.getItem(`${cacheKey}_timestamp`);
+        const savedTools = sessionStorage.getItem('categoryDisplayedTools');
+        const savedOffset = sessionStorage.getItem('categoryCurrentOffset');
+        const savedTimestamp = sessionStorage.getItem('categoryToolsTimestamp');
+        const savedHasMore = sessionStorage.getItem('categoryHasMoreTools');
+        const savedCategory = sessionStorage.getItem('cachedCategoryName');
+        
         const isDataFresh = savedTimestamp && 
           (Date.now() - parseInt(savedTimestamp)) < 5 * 60 * 1000; // 5 minutes
-
-        if (savedTools && isDataFresh) {
+        
+        // Check if cached data is for the same category
+        if (savedTools && savedOffset && isDataFresh && savedCategory === decodedCategory) {
           try {
             const parsedTools = JSON.parse(savedTools);
-            setAllTools(parsedTools);
-            setDisplayedTools(parsedTools.slice(0, TOOLS_PER_LOAD));
-            setTotalResults(parsedTools.length);
-            setCurrentIndex(TOOLS_PER_LOAD);
+            setDisplayedTools(parsedTools);
+            setCurrentOffset(parseInt(savedOffset));
+            setHasMoreTools(savedHasMore === 'true');
             setLoading(false);
-            // Fetch fresh data in background
-            fetchToolsInBackground(decodedCategory);
             return;
           } catch (error) {
             console.error('Error parsing cached data:', error);
-            sessionStorage.removeItem(cacheKey);
-            sessionStorage.removeItem(`${cacheKey}_timestamp`);
+            clearCachedData();
           }
         }
       }
       
       // Fetch tools if no cache or cache is stale
-      fetchTools(decodedCategory);
+      fetchInitialTools(decodedCategory);
     }
   }, []);
 
   useEffect(() => {
     // Cache the tools data
-    if (typeof window !== 'undefined' && allTools.length > 0 && categoryName) {
+    if (typeof window !== 'undefined' && displayedTools.length > 0 && categoryName) {
       try {
-        const cacheKey = `tools_${categoryName}`;
-        sessionStorage.setItem(cacheKey, JSON.stringify(allTools));
-        sessionStorage.setItem(`${cacheKey}_timestamp`, Date.now().toString());
+        sessionStorage.setItem('categoryDisplayedTools', JSON.stringify(displayedTools));
+        sessionStorage.setItem('categoryCurrentOffset', currentOffset.toString());
+        sessionStorage.setItem('categoryToolsTimestamp', Date.now().toString());
+        sessionStorage.setItem('categoryHasMoreTools', hasMoreTools.toString());
+        sessionStorage.setItem('cachedCategoryName', categoryName);
       } catch (error) {
         console.error('SessionStorage quota exceeded, clearing cache:', error);
-        const cacheKey = `tools_${categoryName}`;
-        sessionStorage.removeItem(cacheKey);
-        sessionStorage.removeItem(`${cacheKey}_timestamp`);
+        clearCachedData();
       }
     }
-  }, [allTools, categoryName]);
+  }, [displayedTools, currentOffset, hasMoreTools, categoryName]);
 
-  const fetchTools = async (category: string) => {
+  const clearCachedData = () => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('categoryDisplayedTools');
+      sessionStorage.removeItem('categoryCurrentOffset');
+      sessionStorage.removeItem('categoryToolsTimestamp');
+      sessionStorage.removeItem('categoryHasMoreTools');
+      sessionStorage.removeItem('cachedCategoryName');
+    }
+  };
+
+  const fetchInitialTools = async (category: string) => {
     try {
       setLoading(true);
       setError(null);
 
       const response = await fetch(
-        `https://ailast-production.up.railway.app/api/tools/category/?category=${encodeURIComponent(category)}`
+        `https://ailast-production.up.railway.app/api/tools/category/?category=${encodeURIComponent(category)}&limit=${TOOLS_PER_LOAD}&offset=0`
       );
 
       if (!response.ok) {
@@ -100,10 +111,10 @@ const CategoryPage = () => {
       const data = await response.json();
       const tools = data.results || [];
       
-      setAllTools(tools);
-      setDisplayedTools(tools.slice(0, TOOLS_PER_LOAD));
+      setDisplayedTools(tools);
       setTotalResults(data.total_results || tools.length);
-      setCurrentIndex(TOOLS_PER_LOAD);
+      setCurrentOffset(TOOLS_PER_LOAD);
+      setHasMoreTools(tools.length === TOOLS_PER_LOAD);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load tools. Please try again.');
       console.error('Error fetching tools:', err);
@@ -112,41 +123,33 @@ const CategoryPage = () => {
     }
   };
 
-  const fetchToolsInBackground = async (category: string) => {
+  const handleLoadMore = async () => {
+    if (loadingMore || !hasMoreTools) return;
+    setLoadingMore(true);
     try {
       const response = await fetch(
-        `https://ailast-production.up.railway.app/api/tools/category/?category=${encodeURIComponent(category)}`
+        `https://ailast-production.up.railway.app/api/tools/category/?category=${encodeURIComponent(categoryName)}&limit=${TOOLS_PER_LOAD}&offset=${currentOffset}`
       );
-
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
-      const data = await response.json();
-      const tools = data.results || [];
       
-      // Update tools if different from cached version
-      if (JSON.stringify(tools) !== JSON.stringify(allTools)) {
-        setAllTools(tools);
-        setTotalResults(data.total_results || tools.length);
+      const data = await response.json();
+      const newTools = data.results || [];
+      setDisplayedTools(prev => [...prev, ...newTools]);
+      setCurrentOffset(prev => prev + TOOLS_PER_LOAD);
+      if (newTools.length < TOOLS_PER_LOAD) {
+        setHasMoreTools(false);
       }
+      console.log(`Loaded ${newTools.length} more tools. Total: ${displayedTools.length + newTools.length}`);
     } catch (err) {
-      console.error('Background fetch error:', err);
-      // Don't set error state for background fetches
+      setError(err instanceof Error ? err.message : 'An error occurred while loading more tools');
+      console.error('Error loading more tools:', err);
+    } finally {
+      setLoadingMore(false);
     }
   };
-
-  const handleLoadMore = () => {
-    setLoadingMore(true);
-    
-    setTimeout(() => {
-      const nextTools = allTools.slice(currentIndex, currentIndex + TOOLS_PER_LOAD);
-      setDisplayedTools(prev => [...prev, ...nextTools]);
-      setCurrentIndex(prev => prev + TOOLS_PER_LOAD);
-      setLoadingMore(false);
-    }, 500); // Small delay for better UX
-  };
-
   const handleBackClick = () => {
     window.history.back();
   };
@@ -177,15 +180,6 @@ const CategoryPage = () => {
       }
     }
   };
-
-  // const handleToolClick = (toolLink?: string) => {
-  //   if (toolLink) {
-  //     window.open(toolLink, '_blank', 'noopener,noreferrer');
-  //   }
-  // };
-
-  const canLoadMore = currentIndex < allTools.length;
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Section */}
@@ -240,7 +234,11 @@ const CategoryPage = () => {
           <div className="text-center py-16">
             <p className="text-red-600 mb-4">{error}</p>
             <button
-              onClick={() => fetchTools(categoryName)}
+              onClick={() => {
+                setError(null);
+                clearCachedData();
+                fetchInitialTools(categoryName);
+              }}
               className="bg-[#7d42fb] text-white font-semibold px-6 py-2 rounded-full hover:bg-[#6a35d9] transition-colors"
             >
               Try Again
@@ -342,9 +340,8 @@ const CategoryPage = () => {
             </button>
           </div>
         )}
-
         {/* Load More Button */}
-        {!loading && !error && displayedTools.length > 0 && canLoadMore && (
+        {!loading && !error && displayedTools.length > 0 && hasMoreTools && (
           <div className="text-center mt-12">
             <button
               onClick={handleLoadMore}
@@ -357,20 +354,20 @@ const CategoryPage = () => {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Loading...
+                  Loading more tools...
                 </span>
               ) : (
-                `Load More Tools`
+                `Load More Tools (${TOOLS_PER_LOAD} more)`
               )}
             </button>
           </div>
         )}
 
         {/* Show completion message when all tools are loaded */}
-        {!loading && !error && displayedTools.length > 0 && !canLoadMore && allTools.length > TOOLS_PER_LOAD && (
+        {!loading && !error && displayedTools.length > 0 && !hasMoreTools && displayedTools.length >= TOOLS_PER_LOAD && (
           <div className="text-center mt-12">
             <p className="text-gray-600 font-semibold">
-              All {allTools.length} tools loaded! 🎉
+              🎉 All {displayedTools.length} tools loaded for {categoryName}!
             </p>
           </div>
         )}

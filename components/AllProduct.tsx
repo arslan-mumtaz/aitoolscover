@@ -323,7 +323,7 @@ const AllProduct: React.FC = () => {
           ))}
             </section>
       <h1 className="font-bold text-4xl mb-10 px-4 text-black mt-20">
-        Latest AI Tools ({displayedProducts.length} tools loaded)
+        Latest AI Tools
       </h1>
       <section className="w-full mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
         {displayedProducts.map((product) => (
