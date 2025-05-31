@@ -414,7 +414,7 @@ const AllProduct: React.FC = () => {
                 Loading more tools...
               </div>
             ) : (
-              `Load More Tools (${PRODUCTS_PER_LOAD} more)`
+              `Load More Tools`
             )}
           </button>
         </div>
