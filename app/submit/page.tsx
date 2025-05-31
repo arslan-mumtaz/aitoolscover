@@ -58,7 +58,61 @@ const SubmitToolForm = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "authorization": `token ${token}`
+          "authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (response.ok) {
+        setIsSuccessModalOpen(true);
+        // Reset form
+        setName('');
+        setLink('');
+        setImageUrl('');
+        setCategory('');
+        setDescription('');
+      } else {
+        handleSubmitForRegularSignupUsers({ preventDefault: () => {} });
+        // const error = await response.json();
+        // setErrorMessage(error.message || `Submission failed with status: ${response.status}`);
+        // setIsErrorModalOpen(true);
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      setErrorMessage("Network error. Please check your connection and try again.");
+      setIsErrorModalOpen(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmitForRegularSignupUsers = async (e: { preventDefault: () => void; }) => {
+    e.preventDefault();
+
+    // Validation
+    if (!name || !link || !imageUrl || !category || !description) {
+      setErrorMessage("Please fill in all required fields.");
+      setIsErrorModalOpen(true);
+      return;
+    }
+
+    setIsLoading(true);
+
+    const requestBody = {
+      name: name.trim(),
+      link: link.trim(),
+      image_url: imageUrl.trim(),
+      category: category,
+      description: description.trim()
+    };
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch("https://ailast-production.up.railway.app/api/tools/submit/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "authorization": `Token ${token}`
         },
         body: JSON.stringify(requestBody),
       });
