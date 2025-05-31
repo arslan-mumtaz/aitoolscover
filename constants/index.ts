@@ -3,9 +3,9 @@ import { link } from "fs";
 export const NAV_LINKS = [
   { href: "/", key: "added_today", label: "Added Today" },
   { href: "/", key: "full_list", label: "Full List" },
-  { href: "/", key: "ai_tools", label: "AI Tools" },
+  { href: "/tools", key: "ai_tools", label: "AI Tools" },
   { href: "/", key: "gpts ", label: "GPTs " },
-  { href: "/", key: "ai_categories", label: "AI Categories" },
+  { href: "/category", key: "ai_categories", label: "AI Categories" },
   { href: "/", key: "prompts", label: "Prompts" },
   { href: "/", key: "top_picks", label: "Top Picks" },
   { href: "", key: "submit", label: "Submit" },
