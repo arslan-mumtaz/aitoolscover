@@ -54,7 +54,7 @@ const Navbar = () => {
         console.log("trying to hit api");
         const res = await fetch('https://ailast-production.up.railway.app/api/check-login/', {
           headers: {
-            Authorization: `Token ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         });
         
