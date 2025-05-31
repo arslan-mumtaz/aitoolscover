@@ -3,8 +3,9 @@ import React, { useState, useEffect } from 'react';
 import Image from "next/image";
 import Link from "next/link";
 import { FiExternalLink } from "react-icons/fi";
-import { FaArrowLeft, FaArrowUp, FaArrowRight } from "react-icons/fa";
+import { FaArrowLeft, FaArrowUp, FaArrowRight, FaFacebookF, FaWhatsapp, FaLinkedinIn, FaTwitter } from "react-icons/fa";
 import { featuredTools, featuredProducts } from "@/constants";
+
 
 // Helper function to create URL-friendly slugs
 const createSlug = (name: string): string => {
@@ -205,6 +206,48 @@ export default function ToolDetailClient({ slug, searchParams }: ToolDetailClien
               {product.tag}
             </span>
           </p>
+          <div className="flex items-center space-x-4">
+            <p className="text-xl text-[#000000] font-bold">Share this on:</p>
+            {/* Social Icons */}
+            <div className="flex space-x-3">
+              <a
+                href="https://www.facebook.com/sharer/sharer.php?u=YOUR_URL"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Share on Facebook"
+                className="bg-[#3b5998] text-white rounded-full p-2 hover:scale-110 transition-transform"
+              >
+                <FaFacebookF size={16} />
+              </a>
+              <a
+                href="https://api.whatsapp.com/send?text=YOUR_URL"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Share on WhatsApp"
+                className="bg-[#25D366] text-white rounded-full p-2 hover:scale-110 transition-transform"
+              >
+                <FaWhatsapp size={16} />
+              </a>
+              <a
+                href="https://www.linkedin.com/shareArticle?mini=true&url=YOUR_URL"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Share on LinkedIn"
+                className="bg-[#0e76a8] text-white rounded-full p-2 hover:scale-110 transition-transform"
+              >
+                <FaLinkedinIn size={16} />
+              </a>
+              <a
+                href="https://twitter.com/intent/tweet?url=YOUR_URL"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Share on Twitter"
+                className="bg-[#1DA1F2] text-white rounded-full p-2 hover:scale-110 transition-transform"
+              >
+                <FaTwitter size={16} />
+              </a>
+            </div>
+          </div>
         </div>
 
         <div className="relative h-[400px] rounded-2xl overflow-hidden bg-gray-100 flex items-center justify-center">

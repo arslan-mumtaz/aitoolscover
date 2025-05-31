@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI Tools Cover ",
+  title: "AI Tools Cover | AI Tools Directory | AI Tools Listing Updates",
   description: "Your gateway to the finest AI tools, meticulously organized and categorized for easy access.",
 };
 
